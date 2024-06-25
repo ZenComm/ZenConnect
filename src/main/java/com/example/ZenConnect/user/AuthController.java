@@ -2,10 +2,9 @@ package com.example.ZenConnect.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 
@@ -30,6 +29,23 @@ public class AuthController {
                         put("message", e.getMessage());
                     }});
         }
+    }
+
+    @Autowired
+    private LoginService loginService;
+
+    @PostMapping("/login")
+    public String login(@RequestBody LoginDTO loginDTO) {
+        return loginService.login(loginDTO);
+    }
+
+    @GetMapping("/role")
+    public String getUserRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getAuthorities() != null) {
+            return authentication.getAuthorities().iterator().next().getAuthority();
+        }
+        return "No role found";
     }
 }
 
