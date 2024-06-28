@@ -1,6 +1,6 @@
-//package com.example.ZenConnect.group;
-//
-//import org.springframework.data.jpa.repository.JpaRepository;
-//
-//public interface GroupRepository extends JpaRepository<Group, Long> {
-//}
+package com.example.ZenConnect.group;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface GroupRepository extends JpaRepository<Group, Long> {
+}
