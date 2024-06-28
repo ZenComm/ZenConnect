@@ -1,18 +1,21 @@
-//package com.example.ZenConnect.group;
-//
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Service;
-//
-//import java.time.LocalDate;
-//
-//@Service
-//public class GroupService {
-//
-//    @Autowired
-//    private GroupRepository groupRepository;
-//
-//    public Group createGroup(String name) {
-//        Group group = new Group(name, LocalDate.now());
-//        return groupRepository.save(group);
-//    }
-//}
+package com.example.ZenConnect.group;
+
+import io.micrometer.common.util.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+
+@Service
+public class GroupService {
+    @Autowired
+    private GroupRepository groupRepository;
+
+    public Group createGroup(String name) {
+        if (StringUtils.isBlank(name)) {
+            throw new IllegalArgumentException("Group name cannot be null or empty");
+        }
+        Group group = new Group(name);
+        return groupRepository.save(group);
+    }
+}
