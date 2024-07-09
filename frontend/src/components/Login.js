@@ -1,39 +1,65 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { login } from '../services/api';
+import axios from 'axios';
+import './Login.css';
 
-function Login() {
+const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    login(username, password)
-     .then((response) => {
-        console.log('Login successful!');
-        // Handle successful login response
-      })
-     .catch((error) => {
-        setError(error.message);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('http://localhost:8080/api/auth/login', {
+        username,
+        password,
       });
+      const { token } = response.data;
+      // Store the token in local storage or cookies
+      localStorage.setItem('token', token);
+      // Redirect to the protected route
+      window.location.href = '/protected';
+    } catch (error) {
+      setError(error.response.data.error);
+    }
   };
 
   return (
-    <div>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <label>Username:</label>
-        <input type="text" value={username} onChange={(event) => setUsername(event.target.value)} />
-        <br />
-        <label>Password:</label>
-        <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
-        <br />
-        <button type="submit">Login</button>
-        {error && <div style={{ color: 'red' }}>{error}</div>}
-      </form>
+    <div className="login-container">
+      <div className="login-card">
+        <h2>Login</h2>
+        <form onSubmit={handleSubmit}>
+          <label>
+            Username:
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter your username"
+            />
+          </label>
+          <br />
+          <label>
+            Password:
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+            />
+          </label>
+          <br />
+          {error && <div style={{ color: 'ed' }}>{error}</div>}
+          <button type="submit">Login</button>
+        </form>
+        <p>
+          <p>Don't have an account? <Link to="/register">Register</Link></p>
+        </p>
+      </div>
     </div>
   );
-}
-
+};
 
 export default Login;
