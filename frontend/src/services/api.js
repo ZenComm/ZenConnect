@@ -12,16 +12,16 @@ export const login = async (username, password) => {
     if (error.response) {
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
-      console.error(error.response.data);
-      console.error(error.response.status);
-      console.error(error.response.headers);
+      console.error('Response Error:', error.response.data);
+      console.error('Status Code:', error.response.status);
+      console.error('Headers:', error.response.headers);
     } else if (error.request) {
       // The request was made but no response was received
-      console.error(error.request);
+      console.error('Request Error:', error.request);
     } else {
       // Something happened in setting up the request that triggered an Error
-      console.error('Error', error.message);
+      console.error('Error:', error.message);
     }
-    return null;
+    throw error; // Throw error to handle it in the calling component
   }
 };

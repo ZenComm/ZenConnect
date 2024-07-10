@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { login } from '../services/api';
+import { Link, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import './Login.css';
 
@@ -8,6 +7,7 @@ const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const history = useHistory();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,10 +17,10 @@ const Login = () => {
         password,
       });
       const { token } = response.data;
-      // Store the token in local storage or cookies
+      // Store the token in local storage
       localStorage.setItem('token', token);
       // Redirect to the protected route
-      window.location.href = '/protected';
+      history.push('/protected');
     } catch (error) {
       setError(error.response.data.error);
     }
@@ -51,11 +51,11 @@ const Login = () => {
             />
           </label>
           <br />
-          {error && <div style={{ color: 'ed' }}>{error}</div>}
+          {error && <div style={{ color: 'red' }}>{error}</div>}
           <button type="submit">Login</button>
         </form>
         <p>
-          <p>Don't have an account? <Link to="/register">Register</Link></p>
+          Don't have an account? <Link to="/register">Register</Link>
         </p>
       </div>
     </div>

@@ -6,6 +6,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 @RestController
@@ -14,6 +16,8 @@ import java.util.HashMap;
 public class AuthController {
     @Autowired
     private AuthService authService;
+    private UserRepository userRepository;
+
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
@@ -31,6 +35,7 @@ public class AuthController {
                     }});
         }
     }
+
 
     @Autowired
     private LoginService loginService;

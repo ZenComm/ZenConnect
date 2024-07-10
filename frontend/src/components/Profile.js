@@ -1,118 +1,110 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import './Profile.css';
+import AuthService from './AuthService';
 
 const Profile = () => {
-  const [profile, setProfile] = useState({
-    fullName: '',
-    email: '',
-    phoneNumber: '',
-    physicalAddress: '',
-    workExperience: [],
-    technicalSkills: [],
-    image: '',
-  });
-  const [editing, setEditing] = useState(false);
+    let { userId } = useParams();
+    let history = useHistory();
+    const [profile, setProfile] = useState({
+        fullName: '',
+        email: '',
+        phoneNumber: '',
+        physicalAddress: '',
+        workExperience: [],
+        technicalSkills: [],
+        image: ''
+    });
 
-  useEffect(() => {
-    axios.get('/api/profile')
-     .then(response => {
-        setProfile(response.data);
-      })
-     .catch(error => {
-        console.error(error);
-      });
-  }, []);
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const response = await AuthService.getProfile(userId);
+                setProfile(response.data);
+            } catch (error) {
+                console.error('Error fetching profile', error);
+            }
+        };
 
-  const handleEdit = () => {
-    setEditing(true);
-  };
+        fetchProfile();
+    }, [userId]);
 
-  const handleSave = () => {
-    axios.put('/api/profile', profile)
-     .then(response => {
-        setEditing(false);
-      })
-     .catch(error => {
-        console.error(error);
-      });
-  };
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setProfile({ ...profile, [name]: value });
+    };
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setProfile({...profile, [name]: value });
-  };
+    const handleWorkExperienceChange = (index, e) => {
+        const { name, value } = e.target;
+        const newWorkExperience = [...profile.workExperience];
+        newWorkExperience[index] = { ...newWorkExperience[index], [name]: value };
+        setProfile({ ...profile, workExperience: newWorkExperience });
+    };
 
-  return (
-    <div className="profile-container">
-      <div className="profile-header">
-        <h1>{profile.fullName}</h1>
-        {editing? (
-          <button className="button save-button" onClick={handleSave}>Save</button>
-        ) : (
-          <button className="button" onClick={handleEdit}>Edit Profile</button>
-        )}
-      </div>
-      <div className="profile-content">
-        <div className="profile-section">
-                  <h2>Image</h2>
-                  <img src={profile.image} alt="Profile Image" />
-                  {editing? (
-                    <input type="file" name="image" onChange={handleChange} />
-                  ) : null}
+    const handleAddWorkExperience = () => {
+        setProfile({
+            ...profile,
+            workExperience: [...profile.workExperience, { company: '', dateStarted: '', dateEnded: '' }]
+        });
+    };
+
+    const handleRemoveWorkExperience = (index) => {
+        const newWorkExperience = profile.workExperience.filter((_, i) => i !== index);
+        setProfile({ ...profile, workExperience: newWorkExperience });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await AuthService.updateProfile(userId, profile);
+            history('/dashboard');
+        } catch (error) {
+            console.error('Error updating profile', error);
+        }
+    };
+
+    return (
+        <div className="profile">
+            <h1>Profile</h1>
+            <form onSubmit={handleSubmit}>
+                <div className="form-group">
+                    <label htmlFor="fullName">Full Name</label>
+                    <input type="text" id="fullName" name="fullName" value={profile.fullName} onChange={handleChange} />
                 </div>
-        <div className="profile-section">
-          <h2>Contact Information</h2>
-          <ul>
-            <li>
-              <label>Full Name:</label>
-              <input type="text" name="fullName" value={profile.fullName} onChange={handleChange} disabled={!editing} />
-            </li>
-            <li>
-              <label>Email:</label>
-              <input type="email" name="email" value={profile.email} onChange={handleChange} disabled={!editing} />
-            </li>
-            <li>
-              <label>Phone Number:</label>
-              <input type="tel" name="phoneNumber" value={profile.phoneNumber} onChange={handleChange} disabled={!editing} />
-            </li>
-            <li>
-              <label>Physical Address:</label>
-              <textarea name="physicalAddress" value={profile.physicalAddress} onChange={handleChange} disabled={!editing} />
-            </li>
-          </ul>
+                <div className="form-group">
+                    <label htmlFor="phoneNumber">Phone Number</label>
+                    <input type="text" id="phoneNumber" name="phoneNumber" value={profile.phoneNumber} onChange={handleChange} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="physicalAddress">Physical Address</label>
+                    <input type="text" id="physicalAddress" name="physicalAddress" value={profile.physicalAddress} onChange={handleChange} />
+                </div>
+                {profile.workExperience.map((work, index) => (
+                    <div key={index} className="form-group">
+                        <label htmlFor={`company-${index}`}>Company</label>
+                        <input type="text" id={`company-${index}`} name="company" value={work.company} onChange={(e) => handleWorkExperienceChange(index, e)} />
+                        <label htmlFor={`dateStarted-${index}`}>Date Started</label>
+                        <input type="date" id={`dateStarted-${index}`} name="dateStarted" value={work.dateStarted} onChange={(e) => handleWorkExperienceChange(index, e)} />
+                        <label htmlFor={`dateEnded-${index}`}>Date Ended</label>
+                        <input type="date" id={`dateEnded-${index}`} name="dateEnded" value={work.dateEnded} onChange={(e) => handleWorkExperienceChange(index, e)} />
+                        <button type="button" onClick={() => handleRemoveWorkExperience(index)}>Remove</button>
+                    </div>
+                ))}
+                <button type="button" onClick={handleAddWorkExperience}>Add Work Experience</button>
+                <div className="form-group">
+                    <label htmlFor="technicalSkills">Technical Skills</label>
+                    <input type="text" id="technicalSkills" name="technicalSkills" value={profile.technicalSkills} onChange={handleChange} />
+                </div>
+                <div className="form-group">
+                    <label htmlFor="image">Image</label>
+                    <input type="text" id="image" name="image" value={profile.image} onChange={handleChange} />
+                </div>
+                <button type="submit">Update Profile</button>
+            </form>
         </div>
-        <div className="profile-section">
-          <h2>Work Experience</h2>
-          <ul>
-            {profile.workExperience && profile.workExperience.map((experience, index) => (
-              <li key={index}>
-                <label>Company:</label>
-                <input type="text" name={`workExperience[${index}].company`} value={experience.company} onChange={handleChange} disabled={!editing} />
-                <label>Job Title:</label>
-                <input type="text" name={`workExperience[${index}].jobTitle`} value={experience.jobTitle} onChange={handleChange} disabled={!editing} />
-                <label>Duration:</label>
-                <input type="text" name={`workExperience[${index}].duration`} value={experience.duration} onChange={handleChange} disabled={!editing} />
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="profile-section">
-          <h2>Technical Skills</h2>
-          <ul>
-            {profile.technicalSkills && profile.technicalSkills.map((skill, index) => (
-              <li key={index}>
-                <label>Skill:</label>
-                <input type="text" name={`technicalSkills[${index}].skill`} value={skill.skill} onChange={handleChange} disabled={!editing} />
-              </li>
-            ))}
-          </ul>
-        </div>
-
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Profile;
