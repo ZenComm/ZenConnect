@@ -1,5 +1,8 @@
 package com.example.ZenConnect.user;
 
+import com.example.ZenConnect.profile.Profile;
+import com.example.ZenConnect.profile.ProfileRepository;
+import com.example.ZenConnect.profile.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,7 +14,13 @@ public class AuthService {
     private UserRepository userRepository;
 
     @Autowired
+    private ProfileRepository profileRepository;
+
+    @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ProfileService profileService;
 
     public User registerUser(RegisterRequest registerRequest) {
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
@@ -29,7 +38,15 @@ public class AuthService {
         user.setRole(Role.valueOf(registerRequest.getRole()));
         user.setGroupName(registerRequest.getGroupName());
 
-        return userRepository.save(user);
+        Profile profile = new Profile();
+        profile.setEmail(registerRequest.getEmail());
+        user.setProfile(profile);
+
+        userRepository.save(user);
+
+        profileService.createProfile(user);
+
+        return  user;
     }
 }
 

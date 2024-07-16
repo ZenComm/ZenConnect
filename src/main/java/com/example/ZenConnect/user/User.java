@@ -1,4 +1,5 @@
 package com.example.ZenConnect.user;
+import com.example.ZenConnect.profile.Profile;
 import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -25,6 +26,15 @@ public class User {
 
     @Column(nullable = true)
     private String groupName;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, optional = false)
+    private Profile profile;
+
+    public User() {} // no-arg constructor
+
+    public User(String userId) {
+        this.id = userId;
+    }
 
     public String getId() {
         return id;
@@ -72,6 +82,14 @@ public class User {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    public Profile getProfile() {
+        return profile;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
     }
 }
 
