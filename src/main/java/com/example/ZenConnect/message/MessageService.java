@@ -1,36 +1,55 @@
 package com.example.ZenConnect.message;
 
-
+import com.example.ZenConnect.user.User;
+import com.example.ZenConnect.user.UserDTO;
+import com.example.ZenConnect.user.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MessageService {
     @Autowired
     private MessageRepository messageRepository;
 
-    public Message sendMessage(MessageDTO messageDTO) {
+    @Autowired
+    private UserRepository userRepository;
+
+    public Message sendMessage(String senderId, String recipientId, String content) {
+        User sender = userRepository.findById(senderId).orElseThrow(() -> new RuntimeException("Sender not found"));
+        User recipient = userRepository.findById(recipientId).orElseThrow(() -> new RuntimeException("Recipient not found"));
+
         Message message = new Message();
-        message.setContent(messageDTO.getContent());
-        message.setAnonymous(messageDTO.isAnonymous());
-        message.setGroupId(messageDTO.getGroupId());
+        message.setSender(sender);
+        message.setRecipient(recipient);
+        message.setContent(content);
         message.setTimestamp(LocalDateTime.now());
+
         return messageRepository.save(message);
     }
 
-    public List<Message> getMessagesByGroupId(Long groupId) {
-        return messageRepository.findByGroupId(groupId);
+    public List<MessageDTO> getMessagesForUser(String userId) {
+        List<Message> messages = messageRepository.findMessagesBySenderIdOrRecipientId(userId);
+        return messages.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    public Message respondToMessage(Long messageId, ResponseDTO responseDTO) {
-        Message message = messageRepository.findById(messageId)
-                .orElseThrow(() -> new RuntimeException("Message not found"));
-        message.setResponse(responseDTO.getResponse());
-        return messageRepository.save(message);
+    public List<MessageDTO> getConversation(String userId1, String userId2) {
+        List<Message> messages = messageRepository.findConversation(userId1, userId2);
+        return messages.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    private MessageDTO convertToDTO(Message message) {
+        UserDTO senderDTO = new UserDTO(message.getSender().getId(), message.getSender().getProfile().getFullName());
+        UserDTO recipientDTO = new UserDTO(message.getRecipient().getId(), message.getRecipient().getProfile().getFullName());
+        return new MessageDTO(message.getId(), senderDTO, recipientDTO, message.getContent(), message.getTimestamp());
     }
 }
-
-

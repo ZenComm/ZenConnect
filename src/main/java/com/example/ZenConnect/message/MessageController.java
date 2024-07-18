@@ -1,6 +1,5 @@
 package com.example.ZenConnect.message;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,20 +11,19 @@ public class MessageController {
     @Autowired
     private MessageService messageService;
 
-    @PostMapping
-    public Message sendMessage(@RequestBody MessageDTO messageDTO) {
-        return messageService.sendMessage(messageDTO);
+    @PostMapping("/send")
+    public Message sendMessage(@RequestBody SendMessageRequest request) {
+        return messageService.sendMessage(request.getSenderId(), request.getRecipientId(), request.getContent());
     }
 
-    @GetMapping("/group/{groupId}")
-    public List<Message> getMessagesByGroupId(@PathVariable Long groupId) {
-        return messageService.getMessagesByGroupId(groupId);
+    @GetMapping
+    public List<MessageDTO> getMessagesForUser(@RequestParam String userId) {
+        return messageService.getMessagesForUser(userId);
     }
 
-    @PostMapping("/{messageId}/response")
-    public Message respondToMessage(@PathVariable Long messageId, @RequestBody ResponseDTO responseDTO) {
-        return messageService.respondToMessage(messageId, responseDTO);
+    @GetMapping("/conversation")
+    public List<MessageDTO> getConversation(@RequestParam String userId1, @RequestParam String userId2) {
+        return messageService.getConversation(userId1, userId2);
     }
 }
-
 

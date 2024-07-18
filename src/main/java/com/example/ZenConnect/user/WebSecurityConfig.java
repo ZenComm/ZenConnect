@@ -38,6 +38,7 @@ public class WebSecurityConfig {
                         authorizeRequests
                                 .requestMatchers("/api/auth/**","/").permitAll()
                                 .requestMatchers("/api/groups").hasRole("MANAGER")
+                                .requestMatchers("/api/messages").authenticated()
                                 .anyRequest().authenticated()
                 );
         http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
