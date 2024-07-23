@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -52,6 +53,24 @@ public class AuthController {
             return authentication.getAuthorities().iterator().next().getAuthority();
         }
         return "No role found";
+    }
+
+    @GetMapping("/getUsers")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = authService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/interns")
+    public ResponseEntity<List<User>> getAllInterns() {
+        List<User> interns = authService.getAllInterns();
+        return ResponseEntity.ok(interns);
+    }
+
+    @GetMapping("/interns/by-group")
+    public ResponseEntity<List<User>> getInternsByGroup(@RequestParam String groupName) {
+        List<User> interns = authService.getInternsByGroup(groupName);
+        return ResponseEntity.ok(interns);
     }
 }
 

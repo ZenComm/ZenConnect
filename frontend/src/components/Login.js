@@ -19,8 +19,8 @@ const Login = () => {
       const { token } = response.data;
       // Store the token in local storage
       localStorage.setItem('token', token);
-      // Redirect to the protected route
-      history.push('/protected');
+      // Redirect to the profile page
+      history.push('/profile');
     } catch (error) {
       setError(error.response.data.error);
     }
@@ -55,7 +55,7 @@ const Login = () => {
           <button type="submit">Login</button>
         </form>
         <p>
-          Don't have an account? <Link to="/profile">Register</Link>
+          Don't have an account? <Link to="/register">Register</Link>
         </p>
       </div>
     </div>

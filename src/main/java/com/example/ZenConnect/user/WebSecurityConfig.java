@@ -39,10 +39,14 @@ public class WebSecurityConfig {
                                 .requestMatchers("/api/auth/**","/").permitAll()
                                 .requestMatchers("/api/groups").hasRole("MANAGER")
                                 .requestMatchers("/api/messages").authenticated()
+                                .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/users/interns").permitAll()
+                                .requestMatchers("/api/users/interns/by-group").permitAll()
                                 .anyRequest().authenticated()
                 );
         http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 }

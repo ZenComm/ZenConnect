@@ -8,6 +8,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class AuthService {
     @Autowired
@@ -47,6 +49,18 @@ public class AuthService {
         profileService.createProfile(user);
 
         return  user;
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public List<User> getAllInterns() {
+        return userRepository.findByRole("INTERN");
+    }
+
+    public List<User> getInternsByGroup(String groupName) {
+        return userRepository.findInternsByGroup(groupName);
     }
 }
 
