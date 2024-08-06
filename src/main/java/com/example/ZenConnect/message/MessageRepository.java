@@ -1,5 +1,6 @@
 package com.example.ZenConnect.message;
 
+import com.example.ZenConnect.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,5 +15,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findConversation(@Param("userId1") String userId1, @Param("userId2") String userId2);
     @Query("SELECT m FROM Message m WHERE m.sender.id = :userId OR m.recipient.id = :userId")
     List<Message> findMessagesBySenderIdOrRecipientId(@Param("userId") String userId);
+    @Query("SELECT m FROM Message m WHERE m.recipient.id = :recipientId")
+    List<Message> findMessagesByRecipientId(@Param("recipientId") String recipientId);
 
 }

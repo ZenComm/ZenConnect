@@ -72,9 +72,10 @@ public class AuthController {
         return ResponseEntity.ok(interns);
     }
 
-    @GetMapping("/users/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable String id) {
-        User user = authService.getUserById(id);
+    @GetMapping("/me")
+    public ResponseEntity<Optional<User>> getCurrentUser(Authentication authentication) {
+        String username = authentication.getName();
+        Optional<User> user = authService.getUserByUsername(username);
         if (user != null) {
             return ResponseEntity.ok(user);
         } else {

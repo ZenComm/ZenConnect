@@ -34,6 +34,7 @@ public class AuthService {
         }
 
         User user = new User();
+        user.setFull_name(registerRequest.getFull_name());
         user.setUsername(registerRequest.getUsername());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setEmail(registerRequest.getEmail());
@@ -63,9 +64,8 @@ public class AuthService {
         return userRepository.findInternsByGroup(groupName);
     }
 
-    public User getUserById(String id) {
-        Optional<User> optionalUser = userRepository.findById(id);
-        return optionalUser.orElse(null);
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 }
 

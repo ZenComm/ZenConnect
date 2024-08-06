@@ -1,4 +1,5 @@
 package com.example.ZenConnect.profile;
+import com.example.ZenConnect.resumes.Resume;
 import com.example.ZenConnect.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -11,10 +12,10 @@ public class Profile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String fullName;
+    private String full_name;
     private String email;
-    private String phoneNumber;
-    private String physicalAddress;
+    private String phone_number;
+    private String physical_address;
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = false)
     private List<WorkExperience> workExperience;
     @ElementCollection
@@ -24,6 +25,8 @@ public class Profile {
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;
+    @OneToOne(mappedBy = "profile", cascade = CascadeType.ALL)
+    private Resume resume;
 
     // getters and setters
 
@@ -36,12 +39,12 @@ public class Profile {
         this.id = id;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getFull_name() {
+        return full_name;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setFull_name(String full_name) {
+        this.full_name = full_name;
     }
 
     public String getEmail() {
@@ -52,20 +55,20 @@ public class Profile {
         this.email = email;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getPhone_number() {
+        return phone_number;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setPhone_number(String phone_number) {
+        this.phone_number = phone_number;
     }
 
-    public String getPhysicalAddress() {
-        return physicalAddress;
+    public String getPhysical_address() {
+        return physical_address;
     }
 
-    public void setPhysicalAddress(String physicalAddress) {
-        this.physicalAddress = physicalAddress;
+    public void setPhysical_address(String physical_address) {
+        this.physical_address = physical_address;
     }
 
     public List<WorkExperience> getWorkExperience() {
@@ -98,5 +101,13 @@ public class Profile {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public Resume getResume() {
+        return resume;
+    }
+
+    public void setResume(Resume resume) {
+        this.resume = resume;
     }
 }

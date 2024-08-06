@@ -3,6 +3,7 @@ package com.example.ZenConnect.user;
 import jakarta.persistence.Column;
 
 public class RegisterRequest {
+    private String full_name;
     private String username;
     private String password;
     private String email;
@@ -11,6 +12,15 @@ public class RegisterRequest {
     private String groupName;
 
     // Getters and Setters
+
+    public String getFull_name() {
+        return full_name;
+    }
+
+    public void setFull_name(String full_name) {
+        this.full_name = full_name;
+    }
+
     public String getUsername() {
         return username;
     }

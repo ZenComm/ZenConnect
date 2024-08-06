@@ -3,12 +3,10 @@ package com.example.ZenConnect.message;
 import com.example.ZenConnect.user.User;
 import com.example.ZenConnect.user.UserDTO;
 import com.example.ZenConnect.user.UserRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,8 +46,12 @@ public class MessageService {
     }
 
     private MessageDTO convertToDTO(Message message) {
-        UserDTO senderDTO = new UserDTO(message.getSender().getId(), message.getSender().getProfile().getFullName());
-        UserDTO recipientDTO = new UserDTO(message.getRecipient().getId(), message.getRecipient().getProfile().getFullName());
+        UserDTO senderDTO = new UserDTO(message.getSender().getId(), message.getSender().getProfile().getFull_name());
+        UserDTO recipientDTO = new UserDTO(message.getRecipient().getId(), message.getRecipient().getProfile().getFull_name());
         return new MessageDTO(message.getId(), senderDTO, recipientDTO, message.getContent(), message.getTimestamp());
+    }
+
+    public List<Message> getMessagesByRecipientId(String recipientId) {
+        return messageRepository.findByRecipientId(recipientId);
     }
 }

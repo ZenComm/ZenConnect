@@ -12,6 +12,9 @@ public class User {
     @GenericGenerator(name = "prefixed-id", strategy = "com.example.ZenConnect.user.PrefixedIdGenerator")
     private String id;
 
+    @Column(name = "full_name", unique = false, nullable = false)
+    private String full_name;
+
     @Column(name = "username", unique = true, nullable = false)
     private String username;
 
@@ -42,6 +45,14 @@ public class User {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getFull_name() {
+        return full_name;
+    }
+
+    public void setFull_name(String full_name) {
+        this.full_name = full_name;
     }
 
     public String getUsername() {

@@ -1,70 +1,108 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bulma/css/bulma.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import { useHistory, useLocation } from 'react-router-dom';
 
 const Dashboard = () => {
+  const location = useLocation();
+  const { userId, full_name, token } = location.state || {};
+
   const [notice, setNotice] = useState({
-    message: "Sample notification message",
+    message: "",
     date: new Date(),
   });
 
   const [session, setSession] = useState({
-    firstname: "Lesego",
-    lastname: "Molefe",
+    firstname: "",
+    lastname: "",
   });
 
   const [msg, setMsg] = useState("");
   const [employees, setEmployees] = useState([
-    { id: 1, name: "Prince", surname: "Wits" },
-    { id: 2, name: "Letago", surname: "Tut" },
+    { id: 1, name: "", surname: "" },
+    { id: 2, name: "", surname: "" },
   ]);
 
   const [userComp, setUserComp] = useState([
     {
       comp_id: 1,
-      comp_about: "1 Prince Wits",
-      comp_message: "Message 1",
+      comp_about: "",
+      comp_message: "",
       date: new Date(),
       seen: 1,
     },
     {
       comp_id: 2,
-      comp_about: "2 Letago TuT",
-      comp_message: "Message 2",
+      comp_about: "",
+      comp_message: "",
       date: new Date(),
       seen: 0,
     },
   ]);
 
+  const [messages, setMessages] = useState([]);
+
+
   const [compAboutUser, setCompAboutUser] = useState([
     {
-      comp_from: "Prince TuT",
-      comp_message: "Message about you 1",
+      comp_from: "",
+      comp_message: "",
       date: new Date(),
     },
   ]);
 
   const [selectedFile, setSelectedFile] = useState(null);
 
-  const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
-  };
+    const handleFileChange = (e) => {
+      setSelectedFile(e.target.files[0]);
+    };
 
-  const handleFileUpload = (e) => {
-    e.preventDefault();
-    console.log("Selected file:", selectedFile);
-  };
+    const handleFileUpload = async (e) => {
+      e.preventDefault();
+      if (!selectedFile) {
+        alert("Please select a file to upload.");
+        return;
+      }
 
-  const [activeTab, setActiveTab] = useState("complains");
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      console.log("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+      console.log(userId);
+
+      try {
+        const response = await fetch("http://localhost:8080/api/resumes/upload/13", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+          body: formData,
+        });
+
+        if (response.ok) {
+          const result = await response.text();
+          console.log("File uploaded successfully:", result);
+          setMsg("Resume uploaded successfully!");
+        } else {
+          console.error("Failed to upload file");
+          setMsg("Failed to upload resume.");
+        }
+      } catch (error) {
+        console.error("Error uploading file:", error);
+        setMsg("Error uploading resume.");
+      }
+    };
+
+  const [activeTab, setActiveTab] = useState("public");
 
   const [userProfile, setUserProfile] = useState({
-    name: "Lesego Molefe",
-    email: "lesego.molefe@example.com",
-    phone: "+27123456789",
-    bio: "I am a passionate software developer with expertise in React and Node.js.",
-    skills: "php, java, html, js",
-    profilePicture: "icon.jpg",
+    name: "",
+    email: "",
+    phone: "",
+    bio: "",
+    skills: "",
+    profilePicture: "",
   });
 
   const handleTabChange = (tab) => {
@@ -85,6 +123,81 @@ const Dashboard = () => {
   const toggleSendAnonymously = () => {
     setSendAnonymously(!sendAnonymously);
   };
+
+  const messageRef = useRef(null);
+
+  const handleSubmitMessage = async (e) => {
+    e.preventDefault();
+
+    // Check if the form element exists before accessing its value
+    const messageContent = e.target.elements.comp_message ? e.target.elements.comp_message.value : '';
+
+    const payload = {
+      senderId: userId,
+      recipientId: "ZEN_159534c6", // Manager's user id
+      content: messageContent,
+    };
+
+    try {
+      const response = await fetch("http://localhost:8080/api/messages/send", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log("Message sent successfully:", result);
+        setMsg("The message was sent successfully!");
+        // Clear the textarea
+        e.target.elements.comp_message.value = "";
+      } else {
+        console.error("Failed to send message");
+        setMsg("Failed to send message");
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setMsg("Error sending message");
+    }
+  };
+
+  useEffect(() => {
+      if (activeTab === "direct") {
+        const fetchMessages = async () => {
+          try {
+            const response = await fetch(`http://localhost:8080/api/messages/getByRecipientId?recipientId=${userId}`, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+              },
+            });
+            if (response.ok) {
+              const data = await response.json();
+              // Update state with content, full_name and timestamp
+              const formattedMessages = data.map(msg => ({
+                  full_name: msg.sender.full_name,
+                  content: msg.content,
+                  timestamp: msg.timestamp,
+              }));
+              setMessages(formattedMessages);
+            } else {
+              console.error("Failed to fetch messages");
+            }
+          } catch (error) {
+            console.error("Error fetching messages:", error);
+          }
+        };
+
+        fetchMessages();
+      }
+    }, [activeTab, userId, token]);
+
+
+
 
   return (
     <div>
@@ -109,17 +222,20 @@ const Dashboard = () => {
                 style={{ display: "none" }}
                 onChange={handleFileChange}
               />
-              <button type="submit" className="btn btn-outline-primary mx-2">
-                Submit
-              </button>
-              <button type="button" className="btn btn-outline-primary">
-                <a
-                  style={{ textDecoration: "none", color: "blue" }}
-                  href="/"
+              <button
+                  type="submit"
+                  className="btn btn-outline-primary"
                 >
-                  Logout
-                </a>
-              </button>
+                  Submit
+                </button>
+              <button type="button" className="btn btn-outline-primary">
+                              <a
+                                style={{ textDecoration: "none", color: "blue" }}
+                                href="/"
+                              >
+                                Logout
+                              </a>
+                            </button>
             </form>
           </div>
         </div>
@@ -167,7 +283,7 @@ const Dashboard = () => {
         className="alert alert-warning alert-dismissible fade show"
         role="alert"
       >
-        <strong>{session.firstname},</strong>
+        <strong>{full_name}, </strong>
         {msg || "Hope you having a great day 😊😊."}
         <button
           type="button"
@@ -208,7 +324,7 @@ const Dashboard = () => {
           ></div>
         </div>
 
-        <h1>Write a new complain</h1>
+        <h1>Write a new message</h1>
         <br />
         <div
           style={{
@@ -217,39 +333,9 @@ const Dashboard = () => {
             borderRadius: "15px",
           }}
         >
-          <form action="add_complain" method="post">
+          <form onSubmit={handleSubmitMessage}>
             <div className="container-sm">
-              <select
-                required
-                name="comp_about"
-                className="form-select"
-                aria-label="Default select example"
-              >
-                <option selected>
-                  Please choose a member to complain about
-                </option>
-                {employees.map((emp) => (
-                  <option
-                    key={emp.id}
-                    value={`${emp.id} ${emp.name} ${emp.surname}`}
-                  >
-                    {emp.name} {emp.surname}
-                  </option>
-                ))}
-              </select>
               <br />
-
-              <div className="form-floating mb-3">
-                <input
-                  required
-                  name="date"
-                  type="date"
-                  className="form-control"
-                  id="floatingInput"
-                  placeholder="when did it happen?"
-                />
-                <label htmlFor="floatingInput">Incident date</label>
-              </div>
               <div className="row g-2">
                 <div className="col-sm-12">
                   <div className="mb-3">
@@ -257,7 +343,7 @@ const Dashboard = () => {
                       htmlFor="exampleFormControlTextarea1"
                       className="form-label"
                     >
-                      What happened?
+                      Message
                     </label>
                     <textarea
                       required
@@ -265,33 +351,13 @@ const Dashboard = () => {
                       className="form-control"
                       id="exampleFormControlTextarea1"
                       rows="3"
-                    ></textarea>
-                  </div>
-                </div>
-
-                <div className="container-sm">
-                  {/* Other form fields */}
-                  <div className="mb-3 form-check">
-                    <input
-                      type="checkbox"
-                      className="form-check-input"
-                      id="anonymousCheckbox"
-                      checked={sendAnonymously}
-                      onChange={toggleSendAnonymously}
                     />
-                    <label
-                      className="form-check-label"
-                      htmlFor="anonymousCheckbox"
-                    >
-                      Send Anonymously
-                    </label>
                   </div>
-                  {/* Submit button */}
                 </div>
               </div>
               <div style={{ textAlign: "right" }} className="col-sm-12">
                 <button type="submit" className="btn btn-outline-primary">
-                  Post
+                  Send
                 </button>
               </div>
             </div>
@@ -303,34 +369,34 @@ const Dashboard = () => {
             <div className="nav nav-tabs" id="nav-tab" role="tablist">
               <button
                 className={`nav-link ${
-                  activeTab === "complains" ? "active" : ""
+                  activeTab === "public" ? "active" : ""
                 }`}
                 id="nav-home-tab"
-                onClick={() => handleTabChange("complains")}
+                onClick={() => handleTabChange("public")}
                 type="button"
                 role="tab"
                 aria-controls="nav-home"
-                aria-selected={activeTab === "complains"}
+                aria-selected={activeTab === "public"}
               >
-                Complains
+                Public
               </button>
               <button
                 className={`nav-link ${
-                  activeTab === "about-you" ? "active" : ""
+                  activeTab === "direct" ? "active" : ""
                 }`}
                 id="nav-profile-tab"
-                onClick={() => handleTabChange("about-you")}
+                onClick={() => handleTabChange("direct")}
                 type="button"
                 role="tab"
                 aria-controls="nav-profile"
-                aria-selected={activeTab === "about-you"}
+                aria-selected={activeTab === "direct"}
               >
-                About you
+                Direct
               </button>
             </div>
           </nav>
           <div className="tab-content" id="nav-tabContent">
-            {activeTab === "complains" && (
+            {activeTab === "public" && (
               <div
                 className="tab-pane fade show active"
                 id="nav-home"
@@ -380,24 +446,15 @@ const Dashboard = () => {
                 </div>
               </div>
             )}
-            {activeTab === "about-you" && (
-              <div
-                className="tab-pane fade show active"
-                id="nav-profile"
-                role="tabpanel"
-                aria-labelledby="nav-profile-tab"
-              >
+            {activeTab === "direct" && (
+              <div className="tab-pane fade show active" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
                 <div className="container-fluid">
-                  {compAboutUser.length === 0 ? (
-                    <h3>No complaints about you</h3>
+                  {messages.length === 0 ? (
+                    <h3>No messages found</h3>
                   ) : (
-                    compAboutUser.map((comp, index) => (
-                      <div
-                        key={index}
-                        className="alert alert-warning alert-dismissible fade show"
-                        role="alert"
-                      >
-                        <strong>{comp.comp_from}</strong> {comp.comp_message}
+                    messages.map((msg, index) => (
+                      <div key={index} className="alert alert-warning alert-dismissible fade show" role="alert">
+                        <p><strong>{msg.full_name}</strong> <br />{msg.content}</p>
                         <hr />
                         <p
                           style={{
@@ -410,24 +467,20 @@ const Dashboard = () => {
                             color: "white",
                           }}
                         >
-                          {new Date(comp.date).toLocaleDateString("en-US", {
+                          {new Date(msg.timestamp).toLocaleDateString("en-US", {
                             day: "2-digit",
                             month: "long",
                             year: "numeric",
                           })}
                         </p>
-                        <button
-                          type="button"
-                          className="btn-close"
-                          data-bs-dismiss="alert"
-                          aria-label="Close"
-                        ></button>
+                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                       </div>
                     ))
                   )}
                 </div>
               </div>
             )}
+
           </div>
         </div>
       </div>

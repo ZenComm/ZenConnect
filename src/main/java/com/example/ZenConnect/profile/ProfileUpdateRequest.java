@@ -3,22 +3,22 @@ package com.example.ZenConnect.profile;
 import java.util.List;
 
 public class ProfileUpdateRequest {
-    private String fullName;
+    private String full_name;
     private String email;
-    private String phoneNumber;
-    private String physicalAddress;
+    private String phone_number;
+    private String physical_address;
     private List<WorkExperienceRequest> workExperiences;
     private List<String> technicalSkills;
     private String image;
     // getters and setters
 
 
-    public String getFullName() {
-        return fullName;
+    public String getFull_name() {
+        return full_name;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setFull_name(String full_name) {
+        this.full_name = full_name;
     }
 
     public String getEmail() {
@@ -29,20 +29,20 @@ public class ProfileUpdateRequest {
         this.email = email;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getPhone_number() {
+        return phone_number;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setPhone_number(String phone_number) {
+        this.phone_number = phone_number;
     }
 
-    public String getPhysicalAddress() {
-        return physicalAddress;
+    public String getPhysical_address() {
+        return physical_address;
     }
 
-    public void setPhysicalAddress(String physicalAddress) {
-        this.physicalAddress = physicalAddress;
+    public void setPhysical_address(String physical_address) {
+        this.physical_address = physical_address;
     }
 
     public List<WorkExperienceRequest> getWorkExperiences() {

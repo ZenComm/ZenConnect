@@ -8,7 +8,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.ZenConnect.user.User;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
@@ -134,10 +134,10 @@ public class ProfileService {
 
         if(existingProfile != null) {
             // Update the existing profile with the new data
-            existingProfile.setFullName(profile.getFullName());
+            existingProfile.setFull_name(profile.getFull_name());
             existingProfile.setEmail(profile.getEmail());
-            existingProfile.setPhoneNumber(profile.getPhoneNumber());
-            existingProfile.setPhysicalAddress(profile.getPhysicalAddress());
+            existingProfile.setPhone_number(profile.getPhone_number());
+            existingProfile.setPhysical_address(profile.getPhysical_address());
             existingProfile.setWorkExperience(profile.getWorkExperience());
             existingProfile.setTechnicalSkills(profile.getTechnicalSkills());
             existingProfile.setImage(profile.getImage());
@@ -149,5 +149,9 @@ public class ProfileService {
         }
 
 
+    }
+
+    public List<Profile> getAllProfiles() {
+        return profileRepository.findAll();
     }
 }
