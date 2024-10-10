@@ -26,15 +26,25 @@ const Login = () => {
         },
       });
 
-      const { id: userId, full_name: full_name } = userResponse.data;
+      const { id: userId, full_name: full_name, role: role } = userResponse.data;
 
       localStorage.setItem('userId', userId);
       localStorage.setItem('full_name', full_name);
+      localStorage.setItem('role', role);
 
-      history.push({
-        pathname: `/Dashboard`,
-        state: { userId, full_name, token }
-      });
+      if(role == 'MANAGER') {
+        history.push({
+                pathname: `/Admin`,
+                state: { userId, full_name, token }
+              });
+      } else if(role == 'INTERN') {
+        history.push({
+                pathname: `/Dashboard`,
+                state: { userId, full_name, token }
+              });
+      }
+
+
     } catch (error) {
       setError(error.response.data.error);
     }

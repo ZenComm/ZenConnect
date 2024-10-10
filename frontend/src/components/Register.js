@@ -63,7 +63,7 @@ const Register = () => {
               className="form-control"
               value={full_name}
               onChange={(e) => setFull_name(e.target.value)}
-              placeholder="Enter your username"
+              placeholder="Enter your full name"
             />
           </div>
           <div className="mb-3">

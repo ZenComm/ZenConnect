@@ -36,7 +36,7 @@ public class GroupController {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<String> roleResponse = restTemplate.exchange(USER_ROLE_API, HttpMethod.GET, entity, String.class);
+            ResponseEntity<String> roleResponse = restTemplate.exchange("http://localhost:8080/api/auth/role", HttpMethod.GET, entity, String.class);
             String responseBody = roleResponse.getBody();
             Role userRole = Role.valueOf(responseBody.toUpperCase());
 

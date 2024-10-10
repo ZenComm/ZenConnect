@@ -18,6 +18,35 @@ const Dashboard = () => {
     lastname: "",
   });
 
+  const handleProfileClick = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/user/profile/${userId}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUserProfile({
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          bio: data.bio,
+          skills: data.skills,
+          profilePicture: data.profilePicture,
+        });
+        setShowProfileModal(true); // Show the profile modal
+      } else {
+        console.error("Failed to fetch profile");
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    }
+  };
+
+
   const [msg, setMsg] = useState("");
   const [employees, setEmployees] = useState([
     { id: 1, name: "", surname: "" },
@@ -111,9 +140,40 @@ const Dashboard = () => {
 
   const [showProfileModal, setShowProfileModal] = useState(false);
 
-  const handleProfileClick = () => {
-    setShowProfileModal(true);
-  };
+  {showProfileModal && (
+    <div className="modal" style={{ display: "block" }}>
+      <div className="modal-dialog">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title">User Profile</h5>
+            <button
+              type="button"
+              className="btn-close"
+              onClick={handleCloseProfileModal}
+            ></button>
+          </div>
+          <div className="modal-body">
+            <img
+              src={userProfile.profilePicture}
+              alt="Profile"
+              style={{ width: "150px", borderRadius: "50%" }}
+            />
+            <h3>{userProfile.name}</h3>
+            <p><strong>Email:</strong> {userProfile.email}</p>
+            <p><strong>Phone:</strong> {userProfile.phone}</p>
+            <p><strong>Bio:</strong> {userProfile.bio}</p>
+            <p><strong>Skills:</strong> {userProfile.skills}</p>
+          </div>
+          <div className="modal-footer">
+            <button type="button" className="btn btn-secondary" onClick={handleCloseProfileModal}>
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+
 
   const handleCloseProfileModal = () => {
     setShowProfileModal(false);
@@ -134,7 +194,7 @@ const Dashboard = () => {
 
     const payload = {
       senderId: userId,
-      recipientId: "ZEN_159534c6", // Manager's user id
+      recipientId: "ZEN_543f82c8", // Manager's user id
       content: messageContent,
     };
 
@@ -296,21 +356,24 @@ const Dashboard = () => {
       <div style={{ paddingLeft: "5%", paddingRight: "5%" }}>
         <h1 style={{ textAlign: "right" }}>
           {session.firstname} {session.lastname}{" "}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="30"
-            height="30"
-            fill="currentColor"
-            className="bi bi-person-circle"
-            viewBox="0 0 16 16"
-            onClick={handleProfileClick}
-          >
-            <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
-            <path
-              fillRule="evenodd"
-              d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"
-            />
-          </svg>
+          <div onClick={handleProfileClick} style={{ cursor: 'pointer' }}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="30"
+              height="30"
+              fill="currentColor"
+              className="bi bi-person-circle"
+              viewBox="0 0 16 16"
+            >
+              <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+              <path
+                fillRule="evenodd"
+                d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"
+              />
+            </svg>
+          </div>
+
+
         </h1>
         <div className="progress" style={{ height: "5px" }}>
           <div
@@ -485,64 +548,31 @@ const Dashboard = () => {
         </div>
       </div>
       {showProfileModal && (
-        <div className="modal show" tabIndex="-1" style={{ display: "block" }}>
+        <div className="modal" style={{ display: "block" }}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Profile</h5>
+                <h5 className="modal-title">User Profile</h5>
                 <button
                   type="button"
                   className="btn-close"
-                  aria-label="Close"
                   onClick={handleCloseProfileModal}
                 ></button>
               </div>
-              <div className="modal-body d-flex justify-content-center">
-                <div
-                  className="card"
-                  style={{
-                    width: "18rem",
-                    textAlign: "center",
-                    margin: "auto",
-                    border: "2px solid blue",
-                  }}
-                >
-                  <img
-                    src={userProfile.profilePicture}
-                    className="card-img-top"
-                    alt="Profile"
-                  />
-                  <div className="card-body">
-                    <h5
-                      className="card-title"
-                      style={{ marginBottom: "0", fontSize: "1.2rem" }}
-                    >
-                      {userProfile.name}
-                    </h5>
-                    <div className="card-text" style={{ textAlign: "left" }}>
-                      <p style={{ margin: "5px 0", fontSize: "1rem" }}>
-                        <strong>Email:</strong> {userProfile.email}
-                      </p>
-                      <p style={{ margin: "5px 0", fontSize: "1rem" }}>
-                        <strong>Phone:</strong> {userProfile.phone}
-                      </p>
-                      <p style={{ margin: "5px 0", fontSize: "1rem" }}>
-                        <strong>Bio:</strong> {userProfile.bio}
-                      </p>
-                      <p style={{ margin: "5px 0", fontSize: "1rem" }}>
-                        <strong>Skills:</strong> {userProfile.skills}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              <div className="modal-body">
+                <img
+                  src={userProfile.profilePicture}
+                  alt="Profile"
+                  style={{ width: "150px", borderRadius: "50%" }}
+                />
+                <h3>{userProfile.name}</h3>
+                <p><strong>Email:</strong> {userProfile.email}</p>
+                <p><strong>Phone:</strong> {userProfile.phone}</p>
+                <p><strong>Bio:</strong> {userProfile.bio}</p>
+                <p><strong>Skills:</strong> {userProfile.skills}</p>
               </div>
-
               <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={handleCloseProfileModal}
-                >
+                <button type="button" className="btn btn-secondary" onClick={handleCloseProfileModal}>
                   Close
                 </button>
               </div>
@@ -550,6 +580,8 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+
+
     </div>
   );
 };

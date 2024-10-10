@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import axios from 'axios';
+import { useHistory, useLocation } from 'react-router-dom';
 
-function Admin() {
+const Admin= () => {
   const [showModal, setShowModal] = useState(false);
   const [id, setId] = useState('');
   const [firstname, setFirstname] = useState('');
@@ -13,6 +14,36 @@ function Admin() {
   const [message, setMessage] = useState('');
   const [complaintsCount, setComplaintsCount] = useState(0);
   const [complaintsMessages, setComplaintsMessages] = useState([]);
+  const location = useLocation();
+  const { userId, full_name, token, role } = location.state || {};
+
+  const handleSubmitGroup = async (e) => {
+      e.preventDefault();
+
+      const groupData = {
+            name: name,
+            created_at: new Date().toISOString()  // Automated timestamp
+          };
+
+      try {
+            const response = await axios.post(
+              'http://localhost:8080/api/groups/create',
+              groupData,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${token}`,
+                },
+              }
+            );
+            console.log("Group created successfully:", response.data);
+            setMessage('Group created successfully!');
+            setShowModal(false); // Close modal after successful submission
+          } catch (error) {
+            setMessage('Error creating a group');
+            console.error('Error creating group:', error.response ? error.response.data : error.message);
+          }
+    };
 
   useEffect(() => {
     const fetchComplaintsCount = async () => {
@@ -41,11 +72,7 @@ function Admin() {
     setShowModal(!showModal);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Form submitted!');
-    setShowModal(false); // Close the modal after submitting the form
-  };
+
 
   return (
     <div>
@@ -73,14 +100,14 @@ function Admin() {
       </nav>
       <br />
       <div style={{ marginLeft: '4%', marginRight: '4%' }} className="alert alert-warning alert-dismissible fade show" role="alert">
-        <strong>Phumzile,</strong>
+        <strong>{full_name},</strong>
         <br /><br />
         {message ? message : 'Hope you having a great day 😊'}
         <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
       <br />
       <div style={{ paddingLeft: '5%', paddingRight: '5%' }}>
-        <h1 style={{ textAlign: 'right' }}>Hi, Phumzile</h1>
+        <h1 style={{ textAlign: 'right' }}>Hi, {full_name}</h1>
         <div className="progress" style={{ height: '5px' }}>
           <div className="progress-bar" role="progressbar" aria-label="Example 1px high" style={{ width: '100%' }} aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
@@ -88,7 +115,7 @@ function Admin() {
         {/* Modal */}
         {showModal &&
           <div className="modal fade show" style={{ display: 'block', marginRight: '15%' }} tabIndex="-1" role="dialog">
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmitGroup}>
               <div className="modal-dialog" role="document">
                 <div className="modal-content">
                   <div className="modal-header">
@@ -118,7 +145,7 @@ function Admin() {
           </div>
         }
 
-        <h1>Complaints</h1>
+        <h1>Messages</h1>
         <br />
         <div style={{ border: '1px solid blue', padding: '1%', borderRadius: '15px' }}>
           <div style={{ borderRadius: '8px' }} className="alert alert-primary alert-dismissible fade show" role="alert">
@@ -148,7 +175,7 @@ function Admin() {
               <div className="tab-content" id="nav-tabContent">
                 <div style={{ textAlign: 'left' }} className="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab" tabIndex="0">
                   <br />
-                  <form onSubmit={handleSubmit}>
+                  <form onSubmit={handleSubmitGroup}>
                     <div className="mb-3">
                       <label htmlFor="postedBy" className="form-label">Posted by</label>
                       <input disabled type="email" className="form-control" id="postedBy" placeholder="admin@zensar.com" />
